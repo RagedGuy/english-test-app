@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
 import { Plus, Clock, Users, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
+import { useToast } from "@/components/ui/toast";
 
 type Test = {
   id: string;
@@ -16,6 +17,7 @@ type Test = {
 export default function AdminDashboard() {
   const [tests, setTests] = useState<Test[]>([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchTests();
@@ -73,7 +75,7 @@ export default function AdminDashboard() {
                 <button 
                   onClick={() => {
                      navigator.clipboard.writeText(`${window.location.origin}/test/${test.id}`);
-                     alert("Student Link Copied to Clipboard!");
+                     toast("Student link copied to clipboard", "info");
                   }}
                   title="Copy Student Link"
                   className="text-gray-500 hover:text-[#C58359] transition-colors p-2"

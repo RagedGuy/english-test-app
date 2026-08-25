@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { CustomCursor } from "@/components/ui/cursor";
-import { AnimatedBackground } from "@/components/ui/animated-background";
+import { ClientProviders } from "@/components/providers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,10 +18,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={inter.className}>
-        <CustomCursor />
-        <AnimatedBackground>
+        <ClientProviders>
           {children}
-        </AnimatedBackground>
+        </ClientProviders>
       </body>
     </html>
   );
