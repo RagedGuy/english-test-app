@@ -106,13 +106,13 @@ export default function CreateTest() {
 
         <div className="space-y-4">
           <label className="text-xs text-[#F2E3C6] uppercase tracking-widest font-semibold ml-1">
-            Duration (Minutes): <span className="text-[#D8C3A5] ml-2 text-lg">{duration}</span>
+            Duration: <span className="text-[#D8C3A5] ml-2 text-lg">{Math.floor(duration / 60) > 0 ? `${Math.floor(duration / 60)} Hr${Math.floor(duration / 60) > 1 ? 's' : ''}` : ''} {duration % 60 > 0 ? `${duration % 60} Min` : ''}</span>
           </label>
           <div className="glass-panel p-6">
             <input
               type="range"
               min={5}
-              max={180}
+              max={1440}
               step={5}
               value={duration}
               onChange={(e) => setDuration(parseInt(e.target.value))}
@@ -120,7 +120,7 @@ export default function CreateTest() {
             />
             <div className="flex justify-between text-[10px] text-gray-500 uppercase tracking-widest mt-4">
               <span>5 Min</span>
-              <span>180 Min</span>
+              <span>1440 Min (24 Hrs)</span>
             </div>
           </div>
         </div>
