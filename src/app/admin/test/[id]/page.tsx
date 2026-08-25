@@ -6,11 +6,13 @@ import { ArrowLeft, Save, X, Plus } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
+import { useToast } from "@/components/ui/toast";
 
 export type QuestionType = 'mcq' | 'fill_in_blanks' | 'paragraph' | 'audio' | 'general';
 
 export default function ManageTest() {
   const params = useParams();
+  const { toast } = useToast();
   const [test, setTest] = useState<any>(null);
   const [questions, setQuestions] = useState<any[]>([]);
   
@@ -67,7 +69,11 @@ export default function ManageTest() {
       order_index: questions.length
     }]).select();
 
-    if (!error && data) {
+    if (error) {
+      toast(`Error saving: ${error.message}`, "error");
+      console.error(error);
+    } else if (data) {
+       toast("Question added successfully!", "success");
        setQuestions([...questions, data[0]]);
        resetForm();
     }
