@@ -232,7 +232,11 @@ export default function GradeTest() {
                           Student Answer
                         </span>
                         <div className="bg-[#0a0807]/60 border border-[#2a1f18] p-4 text-[#FDF8F5] text-sm font-light whitespace-pre-wrap">
-                          {answer.student_answer || <span className="text-gray-600 italic">No answer provided</span>}
+                          {q.type === "audio" && answer.student_answer && answer.student_answer.startsWith("http") ? (
+                            <audio controls src={answer.student_answer} className="w-full max-w-md h-10" />
+                          ) : (
+                            answer.student_answer || <span className="text-gray-600 italic">No answer provided</span>
+                          )}
                         </div>
                       </div>
 

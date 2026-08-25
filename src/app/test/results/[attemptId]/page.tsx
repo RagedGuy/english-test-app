@@ -166,7 +166,11 @@ export default function StudentResults() {
                 <div className="bg-[#0a0807]/60 border border-[#2a1f18] p-4 text-[#FDF8F5]">
                   <span className="text-[10px] uppercase tracking-widest text-gray-500 font-semibold block mb-2">Your Answer</span>
                   <div className="font-light whitespace-pre-wrap">
-                    {ans?.student_answer || <span className="text-gray-600 italic">No answer provided</span>}
+                    {q.type === "audio" && ans?.student_answer && ans.student_answer.startsWith("http") ? (
+                      <audio controls src={ans.student_answer} className="w-full max-w-md h-10" />
+                    ) : (
+                      ans?.student_answer || <span className="text-gray-600 italic">No answer provided</span>
+                    )}
                   </div>
                 </div>
 

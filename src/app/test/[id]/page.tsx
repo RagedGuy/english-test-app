@@ -20,6 +20,8 @@ export default function TakeTest() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  
+  const [audioBlobs, setAudioBlobs] = useState<Record<string, Blob>>({});
   const [timeLeft, setTimeLeft] = useState(0);
 
   const [recording, setRecording] = useState(false);
@@ -75,6 +77,7 @@ export default function TakeTest() {
         setAudioUrl(url);
         const q = questions[currentQ];
         setAnswer(q.id, "audio_recorded");
+        setAudioBlobs((prev) => ({ ...prev, [q.id]: blob }));
         stream.getTracks().forEach((t) => t.stop());
       };
       mediaRecorder.start();
@@ -105,11 +108,25 @@ export default function TakeTest() {
       return;
     }
 
+    // Upload audio blobs
+    const finalAnswers = { ...answers };
+    for (const [qId, blob] of Object.entries(audioBlobs)) {
+      const fileName = `${attempt.id}/${qId}.webm`;
+      const { error: uploadError } = await supabase.storage.from('audio_recordings').upload(fileName, blob, {
+        contentType: 'audio/webm',
+        upsert: true
+      });
+      if (!uploadError) {
+        const { data: { publicUrl } } = supabase.storage.from('audio_recordings').getPublicUrl(fileName);
+        finalAnswers[qId] = publicUrl;
+      }
+    }
+
     // Save each answer
     const answerRows = questions.map((q) => ({
       attempt_id: attempt.id,
       question_id: q.id,
-      student_answer: answers[q.id] || "",
+      student_answer: finalAnswers[q.id] || "",
     }));
 
     const { error: ansErr } = await supabase.from("answers").insert(answerRows);
@@ -271,23 +288,26 @@ export default function TakeTest() {
                 </div>
               </div>
             )}
+
+            {/* Navigation Buttons (Moved higher up) */}
+            <div className="flex items-center justify-between pt-8 mt-8 border-t border-[#2a1f18] pl-0 md:pl-12">
+              <motion.button whileTap={{ scale: 0.95 }} onClick={() => setCurrentQ((p) => Math.max(0, p - 1))} disabled={currentQ === 0} className="flex items-center gap-2 text-gray-400 hover:text-[#C58359] disabled:opacity-30 transition-colors uppercase tracking-widest text-xs font-semibold">
+                <ArrowLeft className="w-4 h-4" /><span>Previous</span>
+              </motion.button>
+              
+              {currentQ === questions.length - 1 ? (
+                <motion.button whileTap={{ scale: 0.95 }} onClick={handleSubmit} disabled={submitting} className="flex items-center gap-2 bg-[#C58359] text-[#050505] px-6 md:px-8 py-3 font-bold uppercase tracking-widest hover:bg-[#E3B497] transition-all duration-300 disabled:opacity-50 text-sm">
+                  {submitting ? "Submitting..." : "Submit Test"}{!submitting && <Send className="w-4 h-4" />}
+                </motion.button>
+              ) : (
+                <motion.button whileTap={{ scale: 0.95 }} onClick={() => setCurrentQ((p) => Math.min(questions.length - 1, p + 1))} className="flex items-center gap-2 bg-[#1a120e] border border-[#2a1f18] px-6 py-3 text-[#C58359] hover:border-[#C58359] transition-all duration-300 uppercase tracking-widest text-xs font-semibold">
+                  <span>Next Question</span><ArrowRight className="w-4 h-4" />
+                </motion.button>
+              )}
+            </div>
+
           </motion.div>
         </AnimatePresence>
-      </div>
-
-      <div className="glass-panel px-4 md:px-8 py-4 flex items-center justify-between sticky bottom-0">
-        <motion.button whileTap={{ scale: 0.95 }} onClick={() => setCurrentQ((p) => Math.max(0, p - 1))} disabled={currentQ === 0} className="flex items-center gap-2 text-gray-400 hover:text-[#C58359] disabled:opacity-30 transition-colors uppercase tracking-widest text-xs font-semibold">
-          <ArrowLeft className="w-4 h-4" /><span className="hidden md:inline">Previous</span>
-        </motion.button>
-        {currentQ === questions.length - 1 ? (
-          <motion.button whileTap={{ scale: 0.95 }} onClick={handleSubmit} disabled={submitting} className="flex items-center gap-2 bg-[#C58359] text-[#050505] px-6 md:px-8 py-3 font-bold uppercase tracking-widest hover:bg-[#E3B497] transition-all duration-300 disabled:opacity-50 text-sm">
-            {submitting ? "Submitting..." : "Submit Test"}{!submitting && <Send className="w-4 h-4" />}
-          </motion.button>
-        ) : (
-          <motion.button whileTap={{ scale: 0.95 }} onClick={() => setCurrentQ((p) => Math.min(questions.length - 1, p + 1))} className="flex items-center gap-2 text-[#C58359] hover:text-[#E3B497] transition-colors uppercase tracking-widest text-xs font-semibold">
-            <span className="hidden md:inline">Next</span><ArrowRight className="w-4 h-4" />
-          </motion.button>
-        )}
       </div>
     </div>
   );
