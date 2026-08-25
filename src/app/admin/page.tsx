@@ -112,7 +112,7 @@ export default function AdminDashboard() {
                         <button onClick={() => handleCopyLink(test.id)} className="w-full text-left px-4 py-3 text-xs uppercase tracking-widest text-gray-400 hover:bg-[#1a120e] hover:text-[#D8C3A5] transition-colors flex items-center gap-3">
                           <Copy className="w-3.5 h-3.5" /> Copy Student Link
                         </button>
-                        <Link href={`/admin/test/${test.id}`} onClick={() => setOpenMenu(null)}>
+                        <Link href={`/admin/test/${test.id}/grade`} onClick={() => setOpenMenu(null)}>
                           <div className="w-full text-left px-4 py-3 text-xs uppercase tracking-widest text-gray-400 hover:bg-[#1a120e] hover:text-[#D8C3A5] transition-colors flex items-center gap-3">
                             <Star className="w-3.5 h-3.5" /> Rate Attempts
                           </div>
