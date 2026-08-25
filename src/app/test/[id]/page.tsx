@@ -195,7 +195,7 @@ export default function TakeTest() {
       <div className="px-4 md:px-8 py-3 border-b border-[#2a1f18] overflow-x-auto">
         <div className="flex gap-2">
           {questions.map((_, i) => (
-            <button key={i} onClick={() => setCurrentQ(i)} className={`w-9 h-9 shrink-0 flex items-center justify-center text-xs font-bold transition-all duration-200 ${i === currentQ ? "bg-[#C58359] text-[#050505]" : answers[questions[i].id] ? "bg-[#C58359]/20 text-[#E3B497] border border-[#C58359]/40" : "bg-[#0a0807] border border-[#2a1f18] text-gray-500 hover:border-[#C58359]/30"}`}>{i + 1}</button>
+            <motion.button whileTap={{ scale: 0.9 }} key={i} onClick={() => setCurrentQ(i)} className={`w-9 h-9 shrink-0 flex items-center justify-center text-xs font-bold transition-all duration-200 ${i === currentQ ? "bg-[#C58359] text-[#050505]" : answers[questions[i].id] ? "bg-[#C58359]/20 text-[#E3B497] border border-[#C58359]/40" : "bg-[#0a0807] border border-[#2a1f18] text-gray-500 hover:border-[#C58359]/30"}`}>{i + 1}</motion.button>
           ))}
         </div>
       </div>
