@@ -4,21 +4,43 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Clock, BookOpen, LogOut } from "lucide-react";
+import { ArrowRight, Clock, BookOpen, LogOut, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function StudentPortal() {
   const [tests, setTests] = useState<any[]>([]);
+  const [attempts, setAttempts] = useState<Record<string, any[]>>({});
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    fetchTests();
+    fetchTestsAndAttempts();
   }, []);
 
-  const fetchTests = async () => {
-    const { data } = await supabase.from("tests").select("*").order("created_at", { ascending: false });
-    if (data) setTests(data);
+  const fetchTestsAndAttempts = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // Fetch tests
+    const { data: testData } = await supabase.from("tests").select("*").order("created_at", { ascending: false });
+    if (testData) setTests(testData);
+
+    // Fetch attempts for this user
+    const { data: attemptData } = await supabase
+      .from("attempts")
+      .select("*")
+      .eq("student_id", user.id)
+      .order("started_at", { ascending: true }); // true so attempt 1 is first
+
+    if (attemptData) {
+      const grouped: Record<string, any[]> = {};
+      attemptData.forEach((a) => {
+        if (!grouped[a.test_id]) grouped[a.test_id] = [];
+        grouped[a.test_id].push(a);
+      });
+      setAttempts(grouped);
+    }
+    
     setLoading(false);
   };
 
@@ -34,7 +56,7 @@ export default function StudentPortal() {
           <h1 className="text-3xl md:text-4xl font-light tracking-wide text-[#FDF8F5]">
             Available <span className="text-[#C58359] font-bold">Assessments</span>
           </h1>
-          <p className="text-[#C58359]/70 text-sm tracking-widest uppercase mt-2">Select a test to begin</p>
+          <p className="text-[#C58359]/70 text-sm tracking-widest uppercase mt-2">Select a test to begin or view your results</p>
         </div>
         <motion.button whileTap={{ scale: 0.95 }} onClick={handleLogout} className="flex items-center gap-2 text-gray-400 hover:text-[#D65A5A] transition-colors uppercase tracking-widest text-xs font-semibold">
           <LogOut className="w-4 h-4" /> Sign Out
@@ -52,28 +74,63 @@ export default function StudentPortal() {
             <p className="text-gray-400 max-w-md">No tests available. Check back later.</p>
           </div>
         ) : (
-          tests.map((test, i) => (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.08, type: "spring", stiffness: 300, damping: 30 }}
-              key={test.id}
-              className="glass-panel p-6 md:p-8 flex flex-col hover:border-[#C58359]/50 transition-all duration-300 group"
-            >
-              <h3 className="text-xl md:text-2xl font-medium text-[#FDF8F5] mb-2">{test.title}</h3>
-              {test.description && <p className="text-gray-400 text-sm mb-6 line-clamp-2">{test.description}</p>}
-              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[#E3B497] mb-6 md:mb-8">
-                <Clock className="w-4 h-4" />{test.duration_minutes} Minutes
-              </div>
-              <div className="mt-auto pt-6 border-t border-[#2a1f18]">
-                <Link href={`/test/${test.id}`}>
-                  <motion.button whileTap={{ scale: 0.95 }} className="w-full flex items-center justify-center gap-3 bg-transparent border border-[#C58359]/30 text-[#C58359] p-4 font-semibold uppercase tracking-widest hover:bg-[#C58359] hover:text-[#050505] transition-all duration-300">
-                    Start Test<ArrowRight className="w-4 h-4" />
-                  </motion.button>
-                </Link>
-              </div>
-            </motion.div>
-          ))
+          tests.map((test, i) => {
+            const testAttempts = attempts[test.id] || [];
+            
+            return (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.08, type: "spring", stiffness: 300, damping: 30 }}
+                key={test.id}
+                className="glass-panel p-6 md:p-8 flex flex-col hover:border-[#C58359]/50 transition-all duration-300 group"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-xl md:text-2xl font-medium text-[#FDF8F5]">{test.title}</h3>
+                </div>
+                
+                {test.description && <p className="text-gray-400 text-sm mb-6 line-clamp-2">{test.description}</p>}
+                
+                <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-[#E3B497] mb-6">
+                  <Clock className="w-4 h-4" />{test.duration_minutes} Minutes
+                </div>
+
+                {/* Attempt History */}
+                {testAttempts.length > 0 && (
+                  <div className="mb-6 space-y-2 border-t border-[#2a1f18] pt-4">
+                    <h4 className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold mb-3">Your History</h4>
+                    {testAttempts.map((attempt, index) => (
+                      <div key={attempt.id} className="flex items-center justify-between bg-[#1a120e] p-3 border border-[#2a1f18]">
+                        <div className="flex items-center gap-3">
+                          <span className="text-xs font-semibold text-gray-400">Attempt {index + 1}</span>
+                          <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 ${
+                            attempt.status === 'graded' ? 'bg-[#C58359]/20 text-[#C58359]' : 'bg-[#D8C3A5]/10 text-[#D8C3A5]'
+                          }`}>
+                            {attempt.status === 'graded' ? `Score: ${attempt.total_score}pts` : 'Rating in progress'}
+                          </span>
+                        </div>
+                        {attempt.status === 'graded' && (
+                          <Link href={`/test/results/${attempt.id}`}>
+                            <button className="text-[10px] uppercase tracking-widest text-[#C58359] hover:text-[#E3B497] font-bold flex items-center gap-1">
+                              View <ArrowRight className="w-3 h-3" />
+                            </button>
+                          </Link>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <div className="mt-auto pt-4 border-t border-[#2a1f18]">
+                  <Link href={`/test/${test.id}`}>
+                    <motion.button whileTap={{ scale: 0.95 }} className="w-full flex items-center justify-center gap-3 bg-transparent border border-[#C58359]/30 text-[#C58359] p-4 font-semibold uppercase tracking-widest hover:bg-[#C58359] hover:text-[#050505] transition-all duration-300">
+                      {testAttempts.length > 0 ? "Take Test Again" : "Start Test"} <ArrowRight className="w-4 h-4" />
+                    </motion.button>
+                  </Link>
+                </div>
+              </motion.div>
+            );
+          })
         )}
       </div>
     </div>
