@@ -76,6 +76,7 @@ export default function TakeTest() {
         });
         setAnswers(answersObj);
         setExistingAnswerIds(answerIdsObj);
+        setStarted(true); // Skip intro screen, go straight to the test
       }
     }
     

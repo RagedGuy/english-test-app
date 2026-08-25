@@ -4,14 +4,16 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Clock, BookOpen, LogOut, FileText } from "lucide-react";
+import { ArrowRight, Clock, BookOpen, LogOut, FileText, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/toast";
 
 export default function StudentPortal() {
   const [tests, setTests] = useState<any[]>([]);
   const [attempts, setAttempts] = useState<Record<string, any[]>>({});
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchTestsAndAttempts();
@@ -42,6 +44,24 @@ export default function StudentPortal() {
     }
     
     setLoading(false);
+  };
+
+  const deleteAttempt = async (attemptId: string, testId: string) => {
+    const { error } = await supabase.from("attempts").delete().eq("id", attemptId);
+    if (error) {
+      toast("Failed to delete: " + error.message, "error");
+      return;
+    }
+    toast("Attempt deleted", "success");
+    // Update local state
+    setAttempts((prev) => {
+      const updated = { ...prev };
+      if (updated[testId]) {
+        updated[testId] = updated[testId].filter((a) => a.id !== attemptId);
+        if (updated[testId].length === 0) delete updated[testId];
+      }
+      return updated;
+    });
   };
 
   const handleLogout = async () => {
@@ -111,13 +131,23 @@ export default function StudentPortal() {
                              attempt.status === 'in_progress' ? 'In Progress' : 'Rating in progress'}
                           </span>
                         </div>
-                        {attempt.status === 'graded' && (
-                          <Link href={`/test/results/${attempt.id}`}>
-                            <button className="text-[10px] uppercase tracking-widest text-[#C58359] hover:text-[#E3B497] font-bold flex items-center gap-1">
-                              View <ArrowRight className="w-3 h-3" />
-                            </button>
-                          </Link>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {attempt.status === 'graded' && (
+                            <Link href={`/test/results/${attempt.id}`}>
+                              <button className="text-[10px] uppercase tracking-widest text-[#C58359] hover:text-[#E3B497] font-bold flex items-center gap-1">
+                                View <ArrowRight className="w-3 h-3" />
+                              </button>
+                            </Link>
+                          )}
+                          <motion.button 
+                            whileTap={{ scale: 0.9 }} 
+                            onClick={() => deleteAttempt(attempt.id, test.id)} 
+                            className="p-1.5 text-gray-600 hover:text-[#D65A5A] hover:bg-[#D65A5A]/10 transition-all duration-200"
+                            title="Delete attempt"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </motion.button>
+                        </div>
                       </div>
                     ))}
                   </div>
