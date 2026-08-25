@@ -61,9 +61,9 @@ export default function TakeTest() {
         .eq("test_id", params.id)
         .eq("student_id", user.id)
         .eq("status", "in_progress")
-        .order("created_at", { ascending: false })
+        .order("started_at", { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
         
       if (attemptData) {
         setAttemptId(attemptData.id);

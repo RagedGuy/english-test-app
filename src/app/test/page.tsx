@@ -139,6 +139,13 @@ export default function StudentPortal() {
                               </button>
                             </Link>
                           )}
+                          {attempt.status === 'in_progress' && (
+                            <Link href={`/test/${test.id}`}>
+                              <button className="text-[10px] uppercase tracking-widest text-[#C58359] hover:text-[#E3B497] font-bold flex items-center gap-1">
+                                Continue <ArrowRight className="w-3 h-3" />
+                              </button>
+                            </Link>
+                          )}
                           <motion.button 
                             whileTap={{ scale: 0.9 }} 
                             onClick={() => deleteAttempt(attempt.id, test.id)} 
