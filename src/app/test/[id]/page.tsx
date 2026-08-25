@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft, Clock, Send, Mic, Square, CheckCircle } from "lucide-react";
+import { ArrowRight, ArrowLeft, Clock, Send, Mic, Square, CheckCircle, Save } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/components/ui/toast";
 
@@ -168,34 +168,39 @@ export default function TakeTest() {
       }
     }
 
-    // Save each answer
-    const newAnswerIds = { ...existingAnswerIds };
-    for (const q of questions) {
-      if (newAnswerIds[q.id]) {
-        // Update existing answer
-        await supabase.from("answers").update({
-          student_answer: finalAnswers[q.id] || "",
-        }).eq("id", newAnswerIds[q.id]);
-      } else {
-        // Insert new answer
-        const { data: newAns, error: insErr } = await supabase.from("answers").insert({
-          attempt_id: currentAttemptId,
-          question_id: q.id,
-          student_answer: finalAnswers[q.id] || "",
-        }).select().single();
-        if (newAns) {
-          newAnswerIds[q.id] = newAns.id;
-        }
+    // Save each answer using upsert
+    const answerRows = questions.map((q) => {
+      const row: any = {
+        attempt_id: currentAttemptId,
+        question_id: q.id,
+        student_answer: finalAnswers[q.id] || "",
+      };
+      if (existingAnswerIds[q.id]) {
+        row.id = existingAnswerIds[q.id];
       }
+      return row;
+    });
+
+    const { data: savedAnswers, error: ansErr } = await supabase.from("answers").upsert(answerRows, { onConflict: "attempt_id, question_id" }).select();
+    
+    if (ansErr) {
+      console.error(ansErr);
+      toast("Some answers failed to save", "error");
+    } else if (savedAnswers) {
+      const newAnswerIds = { ...existingAnswerIds };
+      savedAnswers.forEach(ans => {
+        newAnswerIds[ans.question_id] = ans.id;
+      });
+      setExistingAnswerIds(newAnswerIds);
     }
-    setExistingAnswerIds(newAnswerIds);
 
     setSubmitting(false);
     if (isFinal) {
       setSubmitted(true);
       toast("Test submitted successfully!", "success");
     } else {
-      toast("Progress saved successfully!", "success");
+      toast("Progress saved successfully! Returning to portal...", "success");
+      router.push("/test");
     }
   };
 
@@ -350,25 +355,29 @@ export default function TakeTest() {
             )}
 
             {/* Navigation Buttons (Moved higher up) */}
-            <div className="flex items-center justify-between pt-8 mt-8 border-t border-[#2a1f18] pl-0 md:pl-12">
-              <motion.button whileTap={{ scale: 0.95 }} onClick={() => setCurrentQ((p) => Math.max(0, p - 1))} disabled={currentQ === 0} className="flex items-center gap-2 text-gray-400 hover:text-[#C58359] disabled:opacity-30 transition-colors uppercase tracking-widest text-xs font-semibold">
-                <ArrowLeft className="w-4 h-4" /><span>Previous</span>
-              </motion.button>
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 mt-8 border-t border-[#2a1f18] pl-0 md:pl-12">
+              <div className="w-full sm:w-auto">
+                <motion.button whileTap={{ scale: 0.95 }} onClick={() => setCurrentQ((p) => Math.max(0, p - 1))} disabled={currentQ === 0} className="w-full flex items-center justify-center gap-2 text-gray-400 hover:text-[#C58359] disabled:opacity-30 transition-colors uppercase tracking-widest text-xs font-semibold py-2">
+                  <ArrowLeft className="w-4 h-4" /><span>Previous</span>
+                </motion.button>
+              </div>
               
-              {currentQ === questions.length - 1 ? (
-                <div className="flex items-center gap-4">
-                  <motion.button whileTap={{ scale: 0.95 }} onClick={() => handleSubmit(false)} disabled={submitting} className="flex items-center gap-2 bg-[#0a0807] border border-[#C58359] text-[#C58359] px-4 md:px-6 py-3 font-bold uppercase tracking-widest hover:bg-[#C58359]/10 transition-all duration-300 disabled:opacity-50 text-sm">
-                    {submitting ? "Saving..." : "Save for Later"}
-                  </motion.button>
-                  <motion.button whileTap={{ scale: 0.95 }} onClick={() => handleSubmit(true)} disabled={submitting} className="flex items-center gap-2 bg-[#C58359] text-[#050505] px-6 md:px-8 py-3 font-bold uppercase tracking-widest hover:bg-[#E3B497] transition-all duration-300 disabled:opacity-50 text-sm">
+              <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                <motion.button whileTap={{ scale: 0.95 }} onClick={() => handleSubmit(false)} disabled={submitting} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#0a0807] border border-[#2a1f18] text-[#C58359] px-6 py-3 font-bold uppercase tracking-widest hover:border-[#C58359] hover:bg-[#C58359]/10 transition-all duration-300 disabled:opacity-50 text-sm">
+                  <Save className="w-4 h-4" />
+                  <span>{submitting ? "Saving..." : "Save & Exit"}</span>
+                </motion.button>
+
+                {currentQ === questions.length - 1 ? (
+                  <motion.button whileTap={{ scale: 0.95 }} onClick={() => handleSubmit(true)} disabled={submitting} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#C58359] text-[#050505] px-8 py-3 font-bold uppercase tracking-widest hover:bg-[#E3B497] transition-all duration-300 disabled:opacity-50 text-sm">
                     {submitting ? "Submitting..." : "Submit Test"}{!submitting && <Send className="w-4 h-4" />}
                   </motion.button>
-                </div>
-              ) : (
-                <motion.button whileTap={{ scale: 0.95 }} onClick={() => setCurrentQ((p) => Math.min(questions.length - 1, p + 1))} className="flex items-center gap-2 bg-[#1a120e] border border-[#2a1f18] px-6 py-3 text-[#C58359] hover:border-[#C58359] transition-all duration-300 uppercase tracking-widest text-xs font-semibold">
-                  <span>Next Question</span><ArrowRight className="w-4 h-4" />
-                </motion.button>
-              )}
+                ) : (
+                  <motion.button whileTap={{ scale: 0.95 }} onClick={() => setCurrentQ((p) => Math.min(questions.length - 1, p + 1))} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#1a120e] border border-[#2a1f18] px-8 py-3 text-[#C58359] hover:border-[#C58359] transition-all duration-300 uppercase tracking-widest text-xs font-semibold">
+                    <span>Next</span><ArrowRight className="w-4 h-4" />
+                  </motion.button>
+                )}
+              </div>
             </div>
 
           </motion.div>
