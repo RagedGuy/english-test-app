@@ -40,7 +40,7 @@ export default function AdminDashboard() {
           <p className="text-[#C58359]/70 text-sm tracking-widest uppercase mt-1">Manage all tests</p>
         </div>
         <Link href="/admin/test/new">
-          <button className="flex items-center gap-2 bg-[#1a120e] border border-[#C58359]/30 text-[#C58359] px-5 py-2.5 rounded-lg text-sm uppercase tracking-widest font-semibold hover:bg-[#C58359] hover:text-[#0d0906] hover:shadow-[0_0_15px_rgba(197,131,89,0.3)] transition-all duration-300">
+          <button className="flex items-center gap-2 bg-[#1a120e] border border-[#C58359]/30 text-[#C58359] px-5 py-2.5 rounded-none text-sm uppercase tracking-widest font-semibold hover:bg-[#C58359] hover:text-[#0d0906] hover:shadow-[0_0_15px_rgba(197,131,89,0.3)] transition-all duration-300">
             <Plus className="w-4 h-4" />
             New Test
           </button>
@@ -51,10 +51,10 @@ export default function AdminDashboard() {
         {loading ? (
           <p className="text-gray-500 uppercase tracking-widest">Loading data...</p>
         ) : tests.length === 0 ? (
-          <div className="col-span-full glass-panel p-16 flex flex-col items-center justify-center text-center rounded-xl">
+          <div className="col-span-full glass-panel p-16 flex flex-col items-center justify-center text-center rounded-none">
             <p className="text-gray-400 max-w-md mb-8">No assessments have been created yet. Initialize your first test to start building the curriculum.</p>
             <Link href="/admin/test/new">
-               <button className="bg-[#C58359] text-[#0d0906] px-8 py-3 rounded-lg text-sm font-semibold uppercase tracking-widest hover:bg-[#E3B497] hover:shadow-[0_0_20px_rgba(227,180,151,0.4)] transition-all duration-300">
+               <button className="bg-[#C58359] text-[#0d0906] px-8 py-3 rounded-none text-sm font-semibold uppercase tracking-widest hover:bg-[#E3B497] hover:shadow-[0_0_20px_rgba(227,180,151,0.4)] transition-all duration-300">
                  Initialize First Test
                </button>
             </Link>
@@ -66,7 +66,7 @@ export default function AdminDashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
               key={test.id}
-              className="glass-panel rounded-xl p-6 flex flex-col hover:border-[#C58359]/50 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(197,131,89,0.1)]"
+              className="glass-panel rounded-none p-6 flex flex-col hover:border-[#C58359]/50 transition-all duration-300 hover:shadow-[0_8px_30px_rgba(197,131,89,0.1)]"
             >
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-xl font-medium text-[#FDF8F5]">{test.title}</h3>

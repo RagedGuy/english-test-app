@@ -14,7 +14,7 @@ export default function Home() {
         className="max-w-3xl w-full text-center space-y-10"
       >
         <div className="flex justify-center mb-10">
-          <div className="w-20 h-20 bg-[#1a120e] rounded-2xl border border-[#2a1f18] flex items-center justify-center shadow-[0_0_30px_rgba(197,131,89,0.15)]">
+          <div className="w-20 h-20 bg-[#1a120e] rounded-none border border-[#2a1f18] flex items-center justify-center shadow-[0_0_30px_rgba(197,131,89,0.15)]">
             <Code className="w-10 h-10 text-[#C58359]" />
           </div>
         </div>
@@ -32,7 +32,7 @@ export default function Home() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 rounded-xl bg-[#C58359] text-[#0d0906] font-semibold uppercase tracking-widest flex items-center gap-3 hover:bg-[#E3B497] hover:shadow-[0_0_20px_rgba(227,180,151,0.4)] transition-all duration-300 w-64 justify-center"
+              className="px-8 py-4 rounded-none bg-[#C58359] text-[#0d0906] font-semibold uppercase tracking-widest flex items-center gap-3 hover:bg-[#E3B497] hover:shadow-[0_0_20px_rgba(227,180,151,0.4)] transition-all duration-300 w-64 justify-center"
             >
               Admin Console
               <ArrowRight className="w-5 h-5" />
@@ -43,7 +43,7 @@ export default function Home() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 rounded-xl glass-panel text-[#C58359] font-semibold uppercase tracking-widest flex items-center gap-3 hover:border-[#C58359] hover:bg-[#1a120e] transition-all duration-300 w-64 justify-center"
+              className="px-8 py-4 rounded-none glass-panel text-[#C58359] font-semibold uppercase tracking-widest flex items-center gap-3 hover:border-[#C58359] hover:bg-[#1a120e] transition-all duration-300 w-64 justify-center"
             >
               Student Portal
             </motion.button>

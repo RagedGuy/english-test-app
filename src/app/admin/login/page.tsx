@@ -18,77 +18,79 @@ export default function AdminLogin() {
     setLoading(true);
     setError(null);
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
       setError(error.message);
-      setLoading(false);
-      return;
+    } else {
+      router.push("/admin");
     }
-
-    // Check if user is admin (you can do this via profiles table or metadata)
-    // For now, just redirect to admin dashboard
-    router.push("/admin");
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md bg-black/50 border border-[#1E1E1E] p-8 space-y-8 backdrop-blur-sm"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="glass-panel p-10 w-full max-w-md bg-[#050505] border border-[#2a1f18]"
       >
-        <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold tracking-widest uppercase text-white">
-            Admin <span className="text-[#00F0FF]">Access</span>
-          </h1>
-          <p className="text-gray-400 text-sm">
-            Enter your credentials to manage the system
-          </p>
+        <div className="flex flex-col items-center mb-10">
+          <div className="w-16 h-16 bg-[#1a120e] border border-[#2a1f18] flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(216,195,165,0.1)]">
+             <Lock className="w-8 h-8 text-[#D8C3A5]" />
+          </div>
+          <h1 className="text-2xl font-light tracking-widest uppercase text-[#FDF8F5]">System Admin</h1>
+          <p className="text-gray-500 text-xs uppercase tracking-widest mt-2">Authentication Required</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
-          <div className="space-y-4">
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-              <input
-                type="email"
-                placeholder="EMAIL ADDRESS"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full bg-[#0A0A0A] border border-[#1E1E1E] text-white px-12 py-4 focus:outline-none focus:border-[#00F0FF] transition-colors placeholder:text-gray-600 uppercase text-sm tracking-wider"
-                required
-              />
-            </div>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-              <input
-                type="password"
-                placeholder="PASSWORD"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-[#0A0A0A] border border-[#1E1E1E] text-white px-12 py-4 focus:outline-none focus:border-[#00F0FF] transition-colors placeholder:text-gray-600 uppercase text-sm tracking-wider"
-                required
-              />
-            </div>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-[#D65A5A]/10 border border-[#D65A5A]/30 text-[#D65A5A] p-4 text-sm shadow-[0_0_15px_rgba(214,90,90,0.1)]"
+            >
+              {error}
+            </motion.div>
+          )}
+
+          <div className="space-y-2">
+            <label className="text-xs text-[#D8C3A5] uppercase tracking-widest font-semibold ml-1">
+              Email Address
+            </label>
+            <input
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-[#0A0A0A] border border-[#2a1f18] text-white p-4 font-light focus:outline-none focus:border-[#D8C3A5]"
+              placeholder="admin@example.com"
+            />
           </div>
 
-          {error && (
-            <p className="text-[#FF3366] text-sm text-center uppercase tracking-wider">
-              {error}
-            </p>
-          )}
+          <div className="space-y-2">
+            <label className="text-xs text-[#D8C3A5] uppercase tracking-widest font-semibold ml-1">
+              Password
+            </label>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full bg-[#0A0A0A] border border-[#2a1f18] text-white p-4 font-light focus:outline-none focus:border-[#D8C3A5]"
+              placeholder="••••••••"
+            />
+          </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-[#00F0FF] text-black font-bold uppercase tracking-widest py-4 flex items-center justify-center gap-2 hover:bg-[#00d0dd] transition-colors disabled:opacity-50"
+            className="w-full bg-[#D8C3A5] text-[#050505] p-4 font-semibold uppercase tracking-widest hover:bg-[#F2E3C6] transition-all duration-300 disabled:opacity-50 shadow-[0_0_15px_rgba(216,195,165,0.3)] hover:shadow-[0_0_25px_rgba(242,227,198,0.5)] mt-4"
           >
-            {loading ? "Authenticating..." : "Initialize Session"}
-            {!loading && <ArrowRight className="w-4 h-4" />}
+            {loading ? "Authenticating..." : "Access Console"}
           </button>
         </form>
       </motion.div>

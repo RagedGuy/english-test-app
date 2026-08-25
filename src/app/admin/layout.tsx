@@ -56,7 +56,7 @@ export default function AdminLayout({
             return (
               <Link key={item.name} href={item.href}>
                 <div
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg uppercase tracking-widest text-xs font-semibold transition-all duration-200 ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-none uppercase tracking-widest text-xs font-semibold transition-all duration-200 ${
                     isActive
                       ? "text-[#0d0906] bg-[#C58359] shadow-[0_0_15px_rgba(197,131,89,0.2)]"
                       : "text-gray-400 hover:text-[#E3B497] hover:bg-[#1a120e]"
@@ -73,7 +73,7 @@ export default function AdminLayout({
         <div className="p-6 border-t border-[#2a1f18]">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 text-gray-400 hover:text-[#D65A5A] transition-colors uppercase tracking-widest text-xs font-semibold w-full px-4 py-2 rounded-lg hover:bg-[#D65A5A]/10"
+            className="flex items-center gap-3 text-gray-400 hover:text-[#D65A5A] transition-colors uppercase tracking-widest text-xs font-semibold w-full px-4 py-2 rounded-none hover:bg-[#D65A5A]/10"
           >
             <LogOut className="w-4 h-4" />
             Sign Out

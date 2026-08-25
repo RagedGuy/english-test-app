@@ -10,7 +10,7 @@ export default function ResultsPage() {
         <p className="text-[#C58359]/70 text-sm tracking-widest uppercase mt-1">Review student submissions and grades</p>
       </header>
 
-      <div className="glass-panel rounded-xl p-16 flex-1 flex flex-col items-center justify-center text-center">
+      <div className="glass-panel rounded-none p-16 flex-1 flex flex-col items-center justify-center text-center">
         <div className="w-20 h-20 rounded-full bg-[#1a120e] border border-[#2a1f18] flex items-center justify-center mb-6">
           <LayoutDashboard className="w-10 h-10 text-[#C58359]/50" />
         </div>

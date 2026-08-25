@@ -29,7 +29,7 @@ export default function ManageTest() {
       <header className="flex justify-between items-center mb-12">
         <div className="flex items-center gap-4">
           <Link href="/admin">
-            <button className="p-2 rounded-full hover:bg-white/5 transition-colors text-gray-400 hover:text-[#C58359]">
+            <button className="p-2 hover:bg-white/5 transition-colors text-gray-400 hover:text-[#C58359]">
               <ArrowLeft className="w-6 h-6" />
             </button>
           </Link>
@@ -69,19 +69,19 @@ export default function ManageTest() {
         </div>
 
         <div className="col-span-1 space-y-4">
-           <div className="glass-panel p-6 rounded-xl">
+           <div className="glass-panel p-6">
              <h3 className="text-sm font-semibold uppercase tracking-widest mb-6 text-[#FDF8F5]">Add New Question</h3>
              <div className="space-y-3">
-               <button className="w-full text-left p-4 rounded-lg bg-[#1a120e] border border-[#2a1f18] hover:border-[#C58359] hover:text-[#C58359] transition-all duration-300 uppercase tracking-widest text-xs font-semibold text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_0_15px_rgba(197,131,89,0.15)]">
+               <button className="w-full text-left p-4 bg-[#1a120e] border border-[#2a1f18] hover:border-[#C58359] hover:text-[#C58359] transition-all duration-300 uppercase tracking-widest text-xs font-semibold text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_0_15px_rgba(197,131,89,0.15)]">
                  + Multiple Choice
                </button>
-               <button className="w-full text-left p-4 rounded-lg bg-[#1a120e] border border-[#2a1f18] hover:border-[#C58359] hover:text-[#C58359] transition-all duration-300 uppercase tracking-widest text-xs font-semibold text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_0_15px_rgba(197,131,89,0.15)]">
+               <button className="w-full text-left p-4 bg-[#1a120e] border border-[#2a1f18] hover:border-[#C58359] hover:text-[#C58359] transition-all duration-300 uppercase tracking-widest text-xs font-semibold text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_0_15px_rgba(197,131,89,0.15)]">
                  + Fill in Blanks
                </button>
-               <button className="w-full text-left p-4 rounded-lg bg-[#1a120e] border border-[#2a1f18] hover:border-[#C58359] hover:text-[#C58359] transition-all duration-300 uppercase tracking-widest text-xs font-semibold text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_0_15px_rgba(197,131,89,0.15)]">
+               <button className="w-full text-left p-4 bg-[#1a120e] border border-[#2a1f18] hover:border-[#C58359] hover:text-[#C58359] transition-all duration-300 uppercase tracking-widest text-xs font-semibold text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_0_15px_rgba(197,131,89,0.15)]">
                  + Paragraph Creation
                </button>
-               <button className="w-full text-left p-4 rounded-lg bg-[#1a120e] border border-[#2a1f18] hover:border-[#D65A5A] hover:text-[#D65A5A] transition-all duration-300 uppercase tracking-widest text-xs font-semibold text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_0_15px_rgba(214,90,90,0.15)]">
+               <button className="w-full text-left p-4 bg-[#1a120e] border border-[#2a1f18] hover:border-[#D65A5A] hover:text-[#D65A5A] transition-all duration-300 uppercase tracking-widest text-xs font-semibold text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_0_15px_rgba(214,90,90,0.15)]">
                  + Audio Recording
                </button>
              </div>

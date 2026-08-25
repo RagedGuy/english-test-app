@@ -66,12 +66,16 @@ export default function CreateTest() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         onSubmit={handleCreate} 
-        className="glass-panel rounded-xl p-10 space-y-8 flex-1"
+        className="glass-panel rounded-none p-10 space-y-8 flex-1"
       >
         {error && (
-          <div className="bg-[#D65A5A]/10 border border-[#D65A5A]/30 text-[#D65A5A] p-4 rounded-lg text-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-[#D65A5A]/10 border border-[#D65A5A]/30 text-[#D65A5A] p-4 text-sm shadow-[0_0_15px_rgba(214,90,90,0.1)]"
+          >
             {error}
-          </div>
+          </motion.div>
         )}
 
         <div className="space-y-3">
@@ -83,7 +87,7 @@ export default function CreateTest() {
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="glass-input w-full text-white p-4 rounded-lg placeholder:text-gray-600 font-light text-lg"
+            className="glass-input w-full text-white p-4 rounded-none placeholder:text-gray-600 font-light text-lg"
             placeholder="e.g. Advanced Grammar Final"
           />
         </div>
@@ -95,30 +99,37 @@ export default function CreateTest() {
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="glass-input w-full text-white p-4 h-32 rounded-lg placeholder:text-gray-600 font-light resize-none"
+            className="glass-input w-full text-white p-4 h-32 rounded-none placeholder:text-gray-600 font-light resize-none"
             placeholder="Brief instructions for the student..."
           />
         </div>
 
-        <div className="space-y-3">
-          <label className="text-xs text-[#E3B497] uppercase tracking-widest font-semibold ml-1">
-            Duration (Minutes)
+        <div className="space-y-4">
+          <label className="text-xs text-[#F2E3C6] uppercase tracking-widest font-semibold ml-1">
+            Duration (Minutes): <span className="text-[#D8C3A5] ml-2 text-lg">{duration}</span>
           </label>
-          <input
-            type="number"
-            required
-            min={1}
-            value={duration}
-            onChange={(e) => setDuration(parseInt(e.target.value))}
-            className="glass-input w-full max-w-[200px] text-white p-4 rounded-lg font-light"
-          />
+          <div className="glass-panel p-6">
+            <input
+              type="range"
+              min={5}
+              max={180}
+              step={5}
+              value={duration}
+              onChange={(e) => setDuration(parseInt(e.target.value))}
+              className="w-full accent-[#D8C3A5] h-1 bg-[#1a120e] appearance-none cursor-pointer outline-none"
+            />
+            <div className="flex justify-between text-[10px] text-gray-500 uppercase tracking-widest mt-4">
+              <span>5 Min</span>
+              <span>180 Min</span>
+            </div>
+          </div>
         </div>
 
         <div className="pt-8 mt-12">
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center justify-center gap-3 w-full sm:w-auto bg-[#C58359] hover:bg-[#E3B497] text-[#0d0906] px-10 py-4 rounded-lg font-semibold uppercase tracking-widest transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(197,131,89,0.3)] hover:shadow-[0_0_30px_rgba(227,180,151,0.5)]"
+            className="flex items-center justify-center gap-3 w-full sm:w-auto bg-[#C58359] hover:bg-[#E3B497] text-[#0d0906] px-10 py-4 rounded-none font-semibold uppercase tracking-widest transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(197,131,89,0.3)] hover:shadow-[0_0_30px_rgba(227,180,151,0.5)]"
           >
             {loading ? "Processing..." : "Create & Add Questions"}
             {!loading && <Save className="w-5 h-5" />}
