@@ -5,23 +5,25 @@ import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
+import { motion } from "framer-motion";
 
 export default function CreateTest() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState(60);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
     
-    // Get current user (mocked or actual auth)
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
-      alert("You must be logged in.");
+      setError("Authentication required.");
       setLoading(false);
       return;
     }
@@ -38,7 +40,7 @@ export default function CreateTest() {
 
     if (error) {
       console.error(error);
-      alert("Error creating test");
+      setError("Database Error: Profile might be missing or permissions denied.");
     } else if (data && data.length > 0) {
       router.push(`/admin/test/${data[0].id}`);
     }
@@ -47,19 +49,33 @@ export default function CreateTest() {
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="p-8 max-w-4xl mx-auto min-h-[calc(100vh-64px)] flex flex-col">
       <header className="flex items-center gap-4 mb-12">
         <Link href="/admin">
-          <button className="p-2 hover:bg-[#1E1E1E] transition-colors">
+          <button className="p-2 rounded-full hover:bg-white/5 transition-colors text-gray-400 hover:text-[#C58359]">
             <ArrowLeft className="w-6 h-6" />
           </button>
         </Link>
-        <h1 className="text-3xl font-bold uppercase tracking-widest">Initialize Test</h1>
+        <div>
+          <h1 className="text-3xl font-light tracking-wide text-[#FDF8F5]">Initialize Test</h1>
+          <p className="text-[#C58359]/70 text-sm tracking-widest uppercase mt-1">Create a new assessment</p>
+        </div>
       </header>
 
-      <form onSubmit={handleCreate} className="space-y-8 bg-black border border-[#1E1E1E] p-8">
-        <div className="space-y-2">
-          <label className="text-xs text-[#00F0FF] uppercase tracking-widest font-bold">
+      <motion.form 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        onSubmit={handleCreate} 
+        className="glass-panel rounded-xl p-10 space-y-8 flex-1"
+      >
+        {error && (
+          <div className="bg-[#D65A5A]/10 border border-[#D65A5A]/30 text-[#D65A5A] p-4 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+
+        <div className="space-y-3">
+          <label className="text-xs text-[#C58359] uppercase tracking-widest font-semibold ml-1">
             Test Title
           </label>
           <input
@@ -67,25 +83,25 @@ export default function CreateTest() {
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-[#0A0A0A] border border-[#1E1E1E] text-white p-4 focus:outline-none focus:border-[#00F0FF] transition-colors placeholder:text-gray-700"
-            placeholder="e.g. ADVANCED GRAMMAR FINAL"
+            className="glass-input w-full text-white p-4 rounded-lg placeholder:text-gray-600 font-light text-lg"
+            placeholder="e.g. Advanced Grammar Final"
           />
         </div>
 
-        <div className="space-y-2">
-          <label className="text-xs text-[#00F0FF] uppercase tracking-widest font-bold">
+        <div className="space-y-3">
+          <label className="text-xs text-[#C58359] uppercase tracking-widest font-semibold ml-1">
             Description (Optional)
           </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full bg-[#0A0A0A] border border-[#1E1E1E] text-white p-4 h-32 focus:outline-none focus:border-[#00F0FF] transition-colors placeholder:text-gray-700 resize-none"
+            className="glass-input w-full text-white p-4 h-32 rounded-lg placeholder:text-gray-600 font-light resize-none"
             placeholder="Brief instructions for the student..."
           />
         </div>
 
-        <div className="space-y-2">
-          <label className="text-xs text-[#FFCC00] uppercase tracking-widest font-bold">
+        <div className="space-y-3">
+          <label className="text-xs text-[#E3B497] uppercase tracking-widest font-semibold ml-1">
             Duration (Minutes)
           </label>
           <input
@@ -94,21 +110,21 @@ export default function CreateTest() {
             min={1}
             value={duration}
             onChange={(e) => setDuration(parseInt(e.target.value))}
-            className="w-full max-w-[200px] bg-[#0A0A0A] border border-[#1E1E1E] text-white p-4 focus:outline-none focus:border-[#FFCC00] transition-colors"
+            className="glass-input w-full max-w-[200px] text-white p-4 rounded-lg font-light"
           />
         </div>
 
-        <div className="pt-8 border-t border-[#1E1E1E]">
+        <div className="pt-8 mt-12">
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center gap-2 bg-[#00F0FF] text-black px-8 py-4 font-bold uppercase tracking-widest hover:bg-white transition-colors disabled:opacity-50"
+            className="flex items-center justify-center gap-3 w-full sm:w-auto bg-[#C58359] hover:bg-[#E3B497] text-[#0d0906] px-10 py-4 rounded-lg font-semibold uppercase tracking-widest transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(197,131,89,0.3)] hover:shadow-[0_0_30px_rgba(227,180,151,0.5)]"
           >
-            {loading ? "PROCESSING..." : "CREATE & ADD QUESTIONS"}
-            {!loading && <Save className="w-4 h-4" />}
+            {loading ? "Processing..." : "Create & Add Questions"}
+            {!loading && <Save className="w-5 h-5" />}
           </button>
         </div>
-      </form>
+      </motion.form>
     </div>
   );
 }

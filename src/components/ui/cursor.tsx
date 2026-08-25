@@ -17,6 +17,8 @@ export const CustomCursor = () => {
       if (
         target.tagName === "BUTTON" ||
         target.tagName === "A" ||
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
         target.closest("button") ||
         target.closest("a") ||
         target.classList.contains("interactive")
@@ -40,29 +42,30 @@ export const CustomCursor = () => {
     <>
       {/* Inner dot */}
       <motion.div
-        className="fixed top-0 left-0 w-2 h-2 bg-cyan-400 rounded-full pointer-events-none z-[9999] mix-blend-difference"
+        className="fixed top-0 left-0 w-3 h-3 bg-[#C58359] rounded-full pointer-events-none z-[9999]"
         animate={{
-          x: position.x - 4,
-          y: position.y - 4,
+          x: position.x - 6,
+          y: position.y - 6,
+          scale: isHovering ? 0 : 1,
         }}
         transition={{
           type: "tween",
-          ease: "backOut",
-          duration: 0.1,
+          ease: "linear",
+          duration: 0.05,
         }}
       />
       {/* Outer circle */}
       <motion.div
-        className="fixed top-0 left-0 w-8 h-8 border border-cyan-400/50 rounded-full pointer-events-none z-[9998] mix-blend-screen"
+        className="fixed top-0 left-0 w-10 h-10 border-2 border-[#C58359]/60 rounded-full pointer-events-none z-[9998]"
         animate={{
-          x: position.x - 16,
-          y: position.y - 16,
+          x: position.x - 20,
+          y: position.y - 20,
           scale: isHovering ? 1.5 : 1,
-          backgroundColor: isHovering ? "rgba(34, 211, 238, 0.1)" : "transparent",
+          backgroundColor: isHovering ? "rgba(197, 131, 89, 0.2)" : "transparent",
         }}
         transition={{
           type: "tween",
-          ease: "backOut",
+          ease: "easeOut",
           duration: 0.15,
         }}
       />
