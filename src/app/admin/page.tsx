@@ -70,7 +70,14 @@ export default function AdminDashboard() {
             >
               <div className="flex justify-between items-start mb-4">
                 <h3 className="text-xl font-medium text-[#FDF8F5]">{test.title}</h3>
-                <button className="text-gray-500 hover:text-[#C58359] transition-colors">
+                <button 
+                  onClick={() => {
+                     navigator.clipboard.writeText(`${window.location.origin}/test/${test.id}`);
+                     alert("Student Link Copied to Clipboard!");
+                  }}
+                  title="Copy Student Link"
+                  className="text-gray-500 hover:text-[#C58359] transition-colors p-2"
+                >
                   <MoreHorizontal className="w-5 h-5" />
                 </button>
               </div>
