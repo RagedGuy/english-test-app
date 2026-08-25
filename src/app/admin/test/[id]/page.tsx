@@ -7,12 +7,14 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 
+export type QuestionType = 'mcq' | 'fill_in_blanks' | 'paragraph' | 'audio' | 'general';
+
 export default function ManageTest() {
   const params = useParams();
   const [test, setTest] = useState<any>(null);
   const [questions, setQuestions] = useState<any[]>([]);
   
-  const [editingType, setEditingType] = useState<string | null>(null);
+  const [editingType, setEditingType] = useState<QuestionType | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Shared Editor State
@@ -54,6 +56,8 @@ export default function ManageTest() {
        content = { topic: prompt };
     } else if (editingType === 'audio') {
        content = { script: prompt };
+    } else if (editingType === 'general') {
+       content = { prompt };
     }
 
     const { data, error } = await supabase.from('questions').insert([{
@@ -117,6 +121,7 @@ export default function ManageTest() {
                          {q.type === 'fill_in_blanks' && q.content.textWithBlanks}
                          {q.type === 'paragraph' && q.content.topic}
                          {q.type === 'audio' && q.content.script}
+                         {q.type === 'general' && q.content.prompt}
                        </div>
                      </div>
                    </div>
@@ -152,6 +157,9 @@ export default function ManageTest() {
                  <button onClick={() => setEditingType('audio')} className="w-full text-left p-4 bg-[#1a120e] border border-[#2a1f18] hover:border-[#D65A5A] hover:text-[#D65A5A] transition-all duration-300 uppercase tracking-widest text-xs font-semibold text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_0_15px_rgba(214,90,90,0.15)]">
                    + Audio Recording
                  </button>
+                 <button onClick={() => setEditingType('general')} className="w-full text-left p-4 bg-[#1a120e] border border-[#2a1f18] hover:border-[#C58359] hover:text-[#C58359] transition-all duration-300 uppercase tracking-widest text-xs font-semibold text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.2)] hover:shadow-[0_0_15px_rgba(197,131,89,0.15)]">
+                   + General (Short Answer)
+                 </button>
                </div>
              </div>
           ) : (
@@ -176,6 +184,7 @@ export default function ManageTest() {
                      {editingType === 'fill_in_blanks' && "Text (Use [brackets] for blanks)"}
                      {editingType === 'paragraph' && "Topic / Prompt"}
                      {editingType === 'audio' && "Script to Read"}
+                     {editingType === 'general' && "Question Prompt"}
                    </label>
                    <textarea
                      value={prompt}

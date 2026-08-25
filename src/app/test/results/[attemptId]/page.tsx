@@ -150,6 +150,7 @@ export default function StudentResults() {
                       {q.type === "fill_in_blanks" && q.content.textWithBlanks}
                       {q.type === "paragraph" && q.content.topic}
                       {q.type === "audio" && q.content.script}
+                      {q.type === "general" && q.content.prompt}
                     </p>
                   </div>
                 </div>

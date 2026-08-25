@@ -212,6 +212,7 @@ export default function TakeTest() {
                   {q.type === "fill_in_blanks" && q.content.textWithBlanks?.replace(/\[.*?\]/g, "________")}
                   {q.type === "paragraph" && q.content.topic}
                   {q.type === "audio" && q.content.script}
+                  {q.type === "general" && q.content.prompt}
                 </p>
               </div>
             </div>
@@ -238,6 +239,12 @@ export default function TakeTest() {
             {q.type === "paragraph" && (
               <div className="pl-0 md:pl-12">
                 <textarea value={answers[q.id] || ""} onChange={(e) => setAnswer(q.id, e.target.value)} className="w-full bg-[#0a0807]/60 border border-[#2a1f18] text-[#FDF8F5] p-4 md:p-5 min-h-[200px] focus:outline-none focus:border-[#C58359] transition-colors font-light resize-none" placeholder="Write your paragraph..." />
+              </div>
+            )}
+
+            {q.type === "general" && (
+              <div className="pl-0 md:pl-12">
+                <textarea value={answers[q.id] || ""} onChange={(e) => setAnswer(q.id, e.target.value)} className="w-full bg-[#0a0807]/60 border border-[#2a1f18] text-[#FDF8F5] p-4 md:p-5 min-h-[100px] focus:outline-none focus:border-[#C58359] transition-colors font-light resize-none" placeholder="Write your answer..." />
               </div>
             )}
 

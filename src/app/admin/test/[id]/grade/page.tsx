@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Save, CheckCircle } from "lucide-react";
+import { ArrowLeft, Save, CheckCircle, Plus, Minus } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useToast } from "@/components/ui/toast";
@@ -220,6 +220,7 @@ export default function GradeTest() {
                           {q.type === "fill_in_blanks" && q.content.textWithBlanks}
                           {q.type === "paragraph" && q.content.topic}
                           {q.type === "audio" && q.content.script}
+                          {q.type === "general" && q.content.prompt}
                         </p>
                       </div>
                     </div>
@@ -251,15 +252,38 @@ export default function GradeTest() {
                           <label className="text-[10px] uppercase tracking-widest text-[#D8C3A5] font-semibold block mb-1">
                             Score
                           </label>
-                          <input
-                            type="number"
-                            min={0}
-                            max={10}
-                            value={scores[answer.id] ?? ""}
-                            onChange={(e) => setScores({ ...scores, [answer.id]: parseInt(e.target.value) || 0 })}
-                            className="w-20 bg-[#0a0807] border border-[#2a1f18] text-white p-2 text-center focus:outline-none focus:border-[#C58359] text-sm"
-                            placeholder="0"
-                          />
+                          <div className="flex items-center border border-[#2a1f18] bg-[#0a0807]">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const current = scores[answer.id] ?? 0;
+                                setScores({ ...scores, [answer.id]: Math.max(0, current - 1) });
+                              }}
+                              className="px-2.5 py-2 text-gray-400 hover:text-[#C58359] hover:bg-[#1a120e] transition-colors border-r border-[#2a1f18] flex items-center justify-center select-none"
+                              aria-label="Decrease score"
+                            >
+                              <Minus className="w-3.5 h-3.5" />
+                            </button>
+                            <input
+                              type="number"
+                              min={0}
+                              value={scores[answer.id] ?? ""}
+                              onChange={(e) => setScores({ ...scores, [answer.id]: parseInt(e.target.value) || 0 })}
+                              className="w-14 bg-transparent text-white p-2 text-center focus:outline-none focus:bg-[#1a120e] text-sm [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]"
+                              placeholder="0"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const current = scores[answer.id] ?? 0;
+                                setScores({ ...scores, [answer.id]: current + 1 });
+                              }}
+                              className="px-2.5 py-2 text-gray-400 hover:text-[#C58359] hover:bg-[#1a120e] transition-colors border-l border-[#2a1f18] flex items-center justify-center select-none"
+                              aria-label="Increase score"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
                         <div className="flex-1">
                           <label className="text-[10px] uppercase tracking-widest text-[#D8C3A5] font-semibold block mb-1">
