@@ -104,9 +104,11 @@ export default function StudentPortal() {
                         <div className="flex items-center gap-3">
                           <span className="text-xs font-semibold text-gray-400">Attempt {index + 1}</span>
                           <span className={`text-[10px] uppercase tracking-widest font-bold px-2 py-0.5 ${
-                            attempt.status === 'graded' ? 'bg-[#C58359]/20 text-[#C58359]' : 'bg-[#D8C3A5]/10 text-[#D8C3A5]'
+                            attempt.status === 'graded' ? 'bg-[#C58359]/20 text-[#C58359]' : 
+                            attempt.status === 'in_progress' ? 'bg-[#D8C3A5]/10 text-[#D8C3A5]' : 'bg-[#D8C3A5]/10 text-[#D8C3A5]'
                           }`}>
-                            {attempt.status === 'graded' ? `Score: ${attempt.total_score}pts` : 'Rating in progress'}
+                            {attempt.status === 'graded' ? `Score: ${attempt.total_score}pts` : 
+                             attempt.status === 'in_progress' ? 'In Progress' : 'Rating in progress'}
                           </span>
                         </div>
                         {attempt.status === 'graded' && (
@@ -124,7 +126,7 @@ export default function StudentPortal() {
                 <div className="mt-auto pt-4 border-t border-[#2a1f18]">
                   <Link href={`/test/${test.id}`}>
                     <motion.button whileTap={{ scale: 0.95 }} className="w-full flex items-center justify-center gap-3 bg-transparent border border-[#C58359]/30 text-[#C58359] p-4 font-semibold uppercase tracking-widest hover:bg-[#C58359] hover:text-[#050505] transition-all duration-300">
-                      {testAttempts.length > 0 ? "Take Test Again" : "Start Test"} <ArrowRight className="w-4 h-4" />
+                      {testAttempts.length > 0 ? (testAttempts[testAttempts.length - 1].status === 'in_progress' ? "Resume Test" : "Take Test Again") : "Start Test"} <ArrowRight className="w-4 h-4" />
                     </motion.button>
                   </Link>
                 </div>

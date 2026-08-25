@@ -12,6 +12,8 @@ export default function TakeTest() {
   const router = useRouter();
   const { toast } = useToast();
 
+  const [attemptId, setAttemptId] = useState<string | null>(null);
+  const [existingAnswerIds, setExistingAnswerIds] = useState<Record<string, string>>({});
   const [test, setTest] = useState<any>(null);
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,7 +39,7 @@ export default function TakeTest() {
     if (!started || submitted || timeLeft <= 0) return;
     const interval = setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev <= 1) { clearInterval(interval); handleSubmit(); return 0; }
+        if (prev <= 1) { clearInterval(interval); handleSubmit(true); return 0; }
         return prev - 1;
       });
     }, 1000);
@@ -50,6 +52,33 @@ export default function TakeTest() {
     if (testData) { setTest(testData); setTimeLeft(testData.duration_minutes * 60); }
     const { data: qData } = await supabase.from("questions").select("*").eq("test_id", params.id).order("order_index");
     if (qData) setQuestions(qData);
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: attemptData } = await supabase
+        .from("attempts")
+        .select("*, answers(*)")
+        .eq("test_id", params.id)
+        .eq("student_id", user.id)
+        .eq("status", "in_progress")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+        
+      if (attemptData) {
+        setAttemptId(attemptData.id);
+        const existingAnswers = attemptData.answers || [];
+        const answersObj: Record<string, string> = {};
+        const answerIdsObj: Record<string, string> = {};
+        existingAnswers.forEach((ans: any) => {
+          answersObj[ans.question_id] = ans.student_answer;
+          answerIdsObj[ans.question_id] = ans.id;
+        });
+        setAnswers(answersObj);
+        setExistingAnswerIds(answerIdsObj);
+      }
+    }
+    
     setLoading(false);
   };
 
@@ -87,31 +116,48 @@ export default function TakeTest() {
 
   const stopRecording = () => { mediaRecorderRef.current?.stop(); setRecording(false); };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (isFinal: boolean = true) => {
     setSubmitting(true);
-    toast("Submitting your answers...", "info");
+    toast(isFinal ? "Submitting your answers..." : "Saving progress...", "info");
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { toast("You must be logged in", "error"); setSubmitting(false); return; }
 
-    // Create attempt
-    const { data: attempt, error: attemptErr } = await supabase.from("attempts").insert([{
-      test_id: params.id,
-      student_id: user.id,
-      status: "submitted",
-      completed_at: new Date().toISOString(),
-    }]).select().single();
+    let currentAttemptId = attemptId;
+    if (!currentAttemptId) {
+      // Create attempt
+      const { data: attempt, error: attemptErr } = await supabase.from("attempts").insert([{
+        test_id: params.id,
+        student_id: user.id,
+        status: isFinal ? "submitted" : "in_progress",
+        completed_at: isFinal ? new Date().toISOString() : null,
+      }]).select().single();
 
-    if (attemptErr || !attempt) {
-      toast("Failed to submit: " + (attemptErr?.message || "Unknown error"), "error");
-      setSubmitting(false);
-      return;
+      if (attemptErr || !attempt) {
+        toast("Failed to save: " + (attemptErr?.message || "Unknown error"), "error");
+        setSubmitting(false);
+        return;
+      }
+      currentAttemptId = attempt.id;
+      setAttemptId(currentAttemptId);
+    } else {
+      // Update attempt
+      const { error: updateErr } = await supabase.from("attempts").update({
+        status: isFinal ? "submitted" : "in_progress",
+        completed_at: isFinal ? new Date().toISOString() : null,
+      }).eq("id", currentAttemptId);
+      
+      if (updateErr) {
+        toast("Failed to update attempt: " + updateErr.message, "error");
+        setSubmitting(false);
+        return;
+      }
     }
 
     // Upload audio blobs
     const finalAnswers = { ...answers };
     for (const [qId, blob] of Object.entries(audioBlobs)) {
-      const fileName = `${attempt.id}/${qId}.webm`;
+      const fileName = `${currentAttemptId}/${qId}.webm`;
       const { error: uploadError } = await supabase.storage.from('audio_recordings').upload(fileName, blob, {
         contentType: 'audio/webm',
         upsert: true
@@ -123,20 +169,34 @@ export default function TakeTest() {
     }
 
     // Save each answer
-    const answerRows = questions.map((q) => ({
-      attempt_id: attempt.id,
-      question_id: q.id,
-      student_answer: finalAnswers[q.id] || "",
-    }));
-
-    const { error: ansErr } = await supabase.from("answers").insert(answerRows);
-    if (ansErr) {
-      toast("Some answers failed to save", "error");
+    const newAnswerIds = { ...existingAnswerIds };
+    for (const q of questions) {
+      if (newAnswerIds[q.id]) {
+        // Update existing answer
+        await supabase.from("answers").update({
+          student_answer: finalAnswers[q.id] || "",
+        }).eq("id", newAnswerIds[q.id]);
+      } else {
+        // Insert new answer
+        const { data: newAns, error: insErr } = await supabase.from("answers").insert({
+          attempt_id: currentAttemptId,
+          question_id: q.id,
+          student_answer: finalAnswers[q.id] || "",
+        }).select().single();
+        if (newAns) {
+          newAnswerIds[q.id] = newAns.id;
+        }
+      }
     }
+    setExistingAnswerIds(newAnswerIds);
 
-    setSubmitted(true);
     setSubmitting(false);
-    toast("Test submitted successfully!", "success");
+    if (isFinal) {
+      setSubmitted(true);
+      toast("Test submitted successfully!", "success");
+    } else {
+      toast("Progress saved successfully!", "success");
+    }
   };
 
   if (loading) {
@@ -296,9 +356,14 @@ export default function TakeTest() {
               </motion.button>
               
               {currentQ === questions.length - 1 ? (
-                <motion.button whileTap={{ scale: 0.95 }} onClick={handleSubmit} disabled={submitting} className="flex items-center gap-2 bg-[#C58359] text-[#050505] px-6 md:px-8 py-3 font-bold uppercase tracking-widest hover:bg-[#E3B497] transition-all duration-300 disabled:opacity-50 text-sm">
-                  {submitting ? "Submitting..." : "Submit Test"}{!submitting && <Send className="w-4 h-4" />}
-                </motion.button>
+                <div className="flex items-center gap-4">
+                  <motion.button whileTap={{ scale: 0.95 }} onClick={() => handleSubmit(false)} disabled={submitting} className="flex items-center gap-2 bg-[#0a0807] border border-[#C58359] text-[#C58359] px-4 md:px-6 py-3 font-bold uppercase tracking-widest hover:bg-[#C58359]/10 transition-all duration-300 disabled:opacity-50 text-sm">
+                    {submitting ? "Saving..." : "Save for Later"}
+                  </motion.button>
+                  <motion.button whileTap={{ scale: 0.95 }} onClick={() => handleSubmit(true)} disabled={submitting} className="flex items-center gap-2 bg-[#C58359] text-[#050505] px-6 md:px-8 py-3 font-bold uppercase tracking-widest hover:bg-[#E3B497] transition-all duration-300 disabled:opacity-50 text-sm">
+                    {submitting ? "Submitting..." : "Submit Test"}{!submitting && <Send className="w-4 h-4" />}
+                  </motion.button>
+                </div>
               ) : (
                 <motion.button whileTap={{ scale: 0.95 }} onClick={() => setCurrentQ((p) => Math.min(questions.length - 1, p + 1))} className="flex items-center gap-2 bg-[#1a120e] border border-[#2a1f18] px-6 py-3 text-[#C58359] hover:border-[#C58359] transition-all duration-300 uppercase tracking-widest text-xs font-semibold">
                   <span>Next Question</span><ArrowRight className="w-4 h-4" />
